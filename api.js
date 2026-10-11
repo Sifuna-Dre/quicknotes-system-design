@@ -45,8 +45,36 @@ function renderNotes(notesToRender) {
         const body = document.createElement("p");
         body.textContent = note.body;
 
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+
+        deleteBtn.addEventListener("click", async () => {
+            deleteBtn.disabled = true;
+
+            try {
+                await request(`${API_URL}/${note.id}`, {
+                    method: "DELETE"
+                });
+
+                // JSONPlaceholder does not permanently delete data.
+                // We remove the note locally so the UI behaves like a real app.
+                notes = notes.filter(n => n.id !== note.id);
+
+                renderNotes(notes);
+
+                statusText.className = "success";
+                statusText.textContent =
+                    `Note ${note.id} deleted successfully.`;
+            } catch (error) {
+                statusText.className = "error";
+                statusText.textContent =
+                    "Failed to delete note.";
+            }
+        });
+
         li.appendChild(title);
         li.appendChild(body);
+        li.appendChild(deleteBtn);
 
         notesList.appendChild(li);
     });
